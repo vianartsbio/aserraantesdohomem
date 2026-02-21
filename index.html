@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>A Serra Antes do Homem</title>
+<style>
+body {
+  margin: 0;
+  font-family: serif;
+  background: #0e0e12;
+  color: #e4e4e4;
+  line-height: 1.7;
+}
+section {
+  padding: 100px 20%;
+  min-height: 100vh;
+}
+h1, h2 {
+  color: white;
+}
+button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<button onclick="ativarAudio()">Iniciar Experiência</button>
+
+<section data-audio="vale">
+<h1>A Serra Antes do Homem</h1>
+<p>Texto inicial do livro...</p>
+</section>
+
+<section data-audio="clarao">
+<h2>O Clarão</h2>
+<p>Maio chegava com sua respiração fria...</p>
+</section>
+
+<section data-audio="corrida">
+<h2>A Corrida dos Três</h2>
+<p>A chuva cessou ao amanhecer...</p>
+</section>
+
+<script>
+
+const trilhas = {
+  vale: new Audio("vale.mp3"),
+  clarao: new Audio("clarao.mp3"),
+  corrida: new Audio("corrida.mp3")
+};
+
+let atual = null;
+let audioLiberado = false;
+
+function ativarAudio() {
+  audioLiberado = true;
+  alert("Áudio ativado. Role a página.");
+}
+
+function fadeOut(audio) {
+  let fade = setInterval(() => {
+    if (audio.volume > 0.05) {
+      audio.volume -= 0.05;
+    } else {
+      audio.pause();
+      clearInterval(fade);
+    }
+  }, 100);
+}
+
+function fadeIn(audio) {
+  audio.volume = 0;
+  audio.play();
+  let fade = setInterval(() => {
+    if (audio.volume < 0.9) {
+      audio.volume += 0.05;
+    } else {
+      clearInterval(fade);
+    }
+  }, 100);
+}
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && audioLiberado) {
+      const nome = entry.target.getAttribute("data-audio");
+      const nova = trilhas[nome];
+
+      if (atual !== nova) {
+        if (atual) fadeOut(atual);
+        atual = nova;
+        fadeIn(atual);
+      }
+    }
+  });
+}, { threshold: 0.6 });
+
+document.querySelectorAll("section").forEach(sec => {
+  observer.observe(sec);
+});
+
+</script>
+
+</body>
+</html>
